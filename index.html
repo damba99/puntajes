@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabla de Posiciones - 35° Aniversario</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:wght@800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --granate: #4A1521;
+      --dorado: #C39A57;
+      --crema-fondo: #F7F2E9;
+      --blanco: #FFFFFF;
+      --texto: #2B2323;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #EFE9DF;
+      color: var(--texto);
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+    }
+
+    .afiche-container {
+      background-color: var(--crema-fondo);
+      width: 100%;
+      max-width: 900px;
+      border: 2px solid var(--granate);
+      outline: 6px solid var(--granate);
+      outline-offset: 4px;
+      border-radius: 8px;
+      padding: 3rem 2rem;
+      box-shadow: 0 10px 30px rgba(74, 21, 33, 0.2);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .titulo-35 {
+      font-family: 'Playfair Display', serif;
+      font-size: 6rem;
+      font-weight: 900;
+      color: var(--granate);
+      line-height: 0.9;
+      margin-bottom: -10px;
+    }
+
+    .cinta-aniversario {
+      background-color: var(--dorado);
+      color: var(--blanco);
+      display: inline-block;
+      padding: 5px 30px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 2;
+    }
+
+    .cinta-aniversario::before,
+    .cinta-aniversario::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      border: 15px solid var(--dorado);
+      z-index: -1;
+    }
+    .cinta-aniversario::before {
+      left: -20px;
+      border-left-color: transparent;
+      border-bottom-color: transparent;
+    }
+    .cinta-aniversario::after {
+      right: -20px;
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .creciendo-juntos {
+      font-family: 'Caveat', cursive;
+      font-size: 2.5rem;
+      color: var(--granate);
+      margin-top: 10px;
+      display: block;
+    }
+
+    .separador {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+    .separador::before,
+    .separador::after {
+      content: '';
+      width: 150px;
+      height: 1px;
+      background-color: var(--dorado);
+      margin: 0 15px;
+    }
+    .corazon {
+      color: var(--dorado);
+      font-size: 1.5rem;
+    }
+
+    /* Pestañas Principales (General / Categoría) */
+    .tabs-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      background-color: var(--crema-fondo);
+      border: 2px solid var(--granate);
+      color: var(--granate);
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .tab-btn:hover {
+      background-color: rgba(74, 21, 33, 0.05);
+    }
+
+    .tab-btn.active {
+      background-color: var(--granate);
+      color: var(--blanco);
+    }
+
+    /* Pestañas Secundarias (Los Desafíos) */
+    .tabs-desafios {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-desafio {
+      background-color: var(--blanco);
+      border: 1px solid var(--dorado);
+      color: var(--granate);
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .tab-desafio:hover:not(.disabled) {
+      background-color: rgba(195, 154, 87, 0.1);
+    }
+
+    .tab-desafio.active {
+      background-color: var(--dorado);
+      color: var(--blanco);
+      border-color: var(--dorado);
+    }
+
+    .tab-desafio.disabled {
+      background-color: #e5e5e5;
+      border-color: #d1d1d1;
+      color: #999;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .vista-seccion {
+      display: none;
+    }
+    .vista-seccion.active {
+      display: block;
+    }
+
+    .tabla-posiciones {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--blanco);
+      border: 1px solid var(--granate);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(195, 154, 87, 0.3);
+    }
+
+    th {
+      background-color: var(--granate);
+      color: var(--blanco);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .col-curso { text-align: left; font-weight: 700; font-size: 1.1rem; color: var(--granate); }
+    .col-carrera { display: block; font-size: 0.85rem; color: #777; font-weight: 500; }
+    .col-equipo { text-align: left; font-weight: 500; }
+    .col-puntos { font-size: 1.5rem; font-weight: 800; color: var(--granate); }
+    
+    .posicion {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--texto);
+    }
+
+    .tabla-general tr:nth-child(1) { background-color: rgba(195, 154, 87, 0.15); }
+    .tabla-general tr:nth-child(1) .posicion { color: #D4AF37; font-size: 2rem; }
+    
+    .tabla-general tr:nth-child(2) { background-color: rgba(192, 192, 192, 0.15); }
+    .tabla-general tr:nth-child(2) .posicion { color: #AAA9AD; font-size: 1.8rem; }
+    
+    .tabla-general tr:nth-child(3) { background-color: rgba(205, 127, 50, 0.15); }
+    .tabla-general tr:nth-child(3) .posicion { color: #B08D57; font-size: 1.8rem; }
+
+    .loader {
+      text-align: center;
+      font-weight: 700;
+      color: var(--dorado);
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .mensaje-vacio {
+      text-align: center;
+      padding: 2rem;
+      color: var(--texto);
+      font-style: italic;
+      background: var(--blanco);
+      border: 1px solid var(--dorado);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="afiche-container">
+    <div class="header">
+      <div class="titulo-35">35°</div>
+      <div class="cinta-aniversario">Aniversario</div>
+      <span class="creciendo-juntos">Creciendo juntos</span>
+    </div>
+
+    <div class="separador">
+      <span class="corazon">♡</span>
+    </div>
+
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="cambiarPestana('general')" id="btn-general">Tabla General</button>
+      <button class="tab-btn" onclick="cambiarPestana('categoria')" id="btn-categoria">Por Desafío</button>
+    </div>
+
+    <div id="status" class="loader">Sincronizando datos con Sheets...</div>
+
+    <!-- VISTA GENERAL -->
+    <div id="vista-general" class="vista-seccion active">
+      <table class="tabla-posiciones tabla-general">
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th style="text-align: left;">Curso</th>
+            <th style="text-align: left;">Equipo</th>
+            <th>Puntos</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-general"></tbody>
+      </table>
+    </div>
+
+    <!-- VISTA POR DESAFÍO -->
+    <div id="vista-categoria" class="vista-seccion">
+      
+      <!-- Contenedor de las pestañas de desafíos (reemplaza al select) -->
+      <div class="tabs-desafios" id="tabs-desafios"></div>
+
+      <div id="contenedor-tabla-categoria">
+        <table class="tabla-posiciones">
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th style="text-align: left;">Curso</th>
+              <th style="text-align: left;">Equipo</th>
+              <th>Puntos</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-categoria"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SHEET_ID = '1fSziDaQuV8BYLSp0bdxgQvTAAa3optV3ltCCUa4UUW8';
+    const SHEET_GID = '692690447'; 
+    const POLLING_INTERVAL = 30000; 
+
+    let baseDatos = [];
+    let nombresDesafios = [];
+    let pestañaActiva = 'general'; 
+    let desafioActivoIndex = null; // Guarda el índice de la pestaña de desafío actual
+
+    // Parseo puro CSV
+    function parseCSV(text) {
+      let result = [];
+      let row = [];
+      let cell = '';
+      let insideQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+        if (char === '"' && insideQuotes && nextChar === '"') {
+          cell += '"';
+          i++;
+        } else if (char === '"') {
+          insideQuotes = !insideQuotes;
+        } else if (char === ',' && !insideQuotes) {
+          row.push(cell);
+          cell = '';
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+          if (char === '\r' && nextChar === '\n') i++;
+          row.push(cell);
+          result.push(row);
+          row = [];
+          cell = '';
+        } else {
+          cell += char;
+        }
+      }
+      row.push(cell);
+      result.push(row);
+      return result;
+    }
+
+    async function fetchData() {
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}&t=${Date.now()}`;
+
+      try {
+        const response = await fetch(url, { cache: 'no-store' });
+        const text = await response.text();
+        const rows = parseCSV(text);
+
+        // REGLA: Extraer nombres de desafíos de la fila 2 SOLO HASTA LA COLUMNA J (índices 3 a 9)
+        nombresDesafios = [];
+        for (let col = 3; col <= 9; col++) {
+          let nombre = (rows[1] && rows[1][col]) ? rows[1][col].trim() : `Desafío ${col - 2}`;
+          nombre = nombre.replace(/[\r\n]+/g, ' '); 
+          nombresDesafios.push(nombre);
+        }
+
+        baseDatos = [];
+        let carreraActual = '-';
+
+        // Procesar desde la fila 3 a la 57 (índices 2 a 56 del array)
+        for (let i = 2; i <= 56; i++) {
+          if (!rows[i]) continue;
+          
+          const colA = (rows[i][0] || '').trim();
+          const colB = (rows[i][1] || '').trim();
+          const colC = (rows[i][2] || '').trim();
+
+          if (colA !== '') carreraActual = colA;
+          if (colB === '' || colB.toLowerCase().includes('curso')) continue;
+
+          let puntajes = [];
+          let total = 0;
+
+          // REGLA: Puntajes totales suman D a K (índices 3 a 10)
+          for (let col = 3; col <= 10; col++) {
+            let pts = 0; 
+            let val = (rows[i][col] || '').trim();
+            if (val !== '' && val !== '-') {
+              let num = parseFloat(val.replace(',', '.'));
+              if (!isNaN(num)) pts = num;
+            }
+            puntajes.push(pts);
+            total += pts;
+          }
+
+          baseDatos.push({
+            carrera: carreraActual,
+            anio: colB,
+            equipo: colC || '-',
+            puntosTotales: total,
+            puntajesDesafios: puntajes
+          });
+        }
+
+        document.getElementById('status').style.display = 'none';
+        
+        renderizarTabsDesafios();
+        
+        if (pestañaActiva === 'general') {
+          renderGeneral();
+        } else {
+          renderCategoria();
+        }
+
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        document.getElementById('status').textContent = 'Fallo al conectar con Sheets. Verificá tu conexión.';
+        document.getElementById('status').style.display = 'block';
+      }
+    }
+
+    // Genera las pestañas para los desafíos (solo si tienen > 0 puntos)
+    function renderizarTabsDesafios() {
+      const contenedor = document.getElementById('tabs-desafios');
+      contenedor.innerHTML = '';
+      
+      let primerActivo = null;
+      let elActualSigueActivo = false;
+
+      nombresDesafios.forEach((nombre, index) => {
+        // Verifica si algún curso tiene más de 0 puntos en este desafío
+        const tienePuntos = baseDatos.some(item => item.puntajesDesafios[index] > 0);
+        
+        const btn = document.createElement('button');
+        btn.className = 'tab-desafio';
+        btn.textContent = nombre;
+
+        if (!tienePuntos) {
+          btn.classList.add('disabled');
+          btn.title = "Aún no hay puntos asignados en este desafío";
+        } else {
+          // Si tiene puntos, la pestaña es cliqueable
+          if (primerActivo === null) primerActivo = index;
+          if (desafioActivoIndex === index) elActualSigueActivo = true;
+
+          btn.onclick = () => {
+            desafioActivoIndex = index;
+            actualizarEstadoVisualTabsDesafios();
+            renderCategoria();
+          };
+        }
+        
+        contenedor.appendChild(btn);
+      });
+
+      // Si el desafío que estábamos viendo se vació, o es la primera carga, seleccionamos el primero disponible
+      if (!elActualSigueActivo && primerActivo !== null) {
+        desafioActivoIndex = primerActivo;
+      } else if (!elActualSigueActivo && primerActivo === null) {
+        desafioActivoIndex = null; // Nada tiene puntos
+      }
+
+      actualizarEstadoVisualTabsDesafios();
+    }
+
+    function actualizarEstadoVisualTabsDesafios() {
+      const btns = document.querySelectorAll('#tabs-desafios .tab-desafio');
+      btns.forEach((btn, index) => {
+        btn.classList.remove('active');
+        if (index === desafioActivoIndex) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    function renderGeneral() {
+      const tbody = document.getElementById('leaderboard-general');
+      tbody.innerHTML = '';
+
+      let datosOrdenados = [...baseDatos].sort((a, b) => b.puntosTotales - a.puntosTotales);
+
+      datosOrdenados.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="posicion">${index + 1}</td>
+          <td class="col-curso">
+            ${item.anio}
+            <span class="col-carrera">${item.carrera}</span>
+          </td>
+          <td class="col-equipo">${item.equipo}</td>
+          <td class="col-puntos">${item.puntosTotales}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function renderCategoria() {
+      const contenedor = document.getElementById('contenedor-tabla-categoria');
+      
+      // Si no hay ningún desafío activo (todos en 0)
+      if (desafioActivoIndex === null) {
+        contenedor.innerHTML = `<div class="mensaje-vacio">Aún no hay puntos registrados en ningún desafío.</div>`;
+        return;
+      }
+
+      let datosFiltrados = baseDatos.filter(item => item.puntajesDesafios[desafioActivoIndex] > 0);
+
+      if (!contenedor.querySelector('table')) {
+        contenedor.innerHTML = `
+          <table class="tabla-posiciones">
+            <thead>
+              <tr>
+                <th>Pos</th>
+                <th style="text-align: left;">Curso</th>
+                <th style="text-align: left;">Equipo</th>
+                <th>Puntos</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-categoria"></tbody>
+          </table>
+        `;
+      }
+
+      const tbodyNuevo = document.getElementById('leaderboard-categoria');
+      tbodyNuevo.innerHTML = '';
+      
+      datosFiltrados.sort((a, b) => b.puntajesDesafios[desafioActivoIndex] - a.puntajesDesafios[desafioActivoIndex]);
+
+      datosFiltrados.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="posicion">${index + 1}</td>
+          <td class="col-curso">
+            ${item.anio}
+            <span class="col-carrera">${item.carrera}</span>
+          </td>
+          <td class="col-equipo">${item.equipo}</td>
+          <td class="col-puntos">${item.puntajesDesafios[desafioActivoIndex]}</td>
+        `;
+        tbodyNuevo.appendChild(row);
+      });
+    }
+
+    function cambiarPestana(vista) {
+      pestañaActiva = vista;
+      
+      document.getElementById('btn-general').classList.remove('active');
+      document.getElementById('btn-categoria').classList.remove('active');
+      document.getElementById(`btn-${vista}`).classList.add('active');
+
+      document.getElementById('vista-general').classList.remove('active');
+      document.getElementById('vista-categoria').classList.remove('active');
+      document.getElementById(`vista-${vista}`).classList.add('active');
+
+      if (vista === 'general') {
+        renderGeneral();
+      } else {
+        renderCategoria();
+      }
+    }
+
+    // Inicializar
+    fetchData();
+    // Refrescar automáticamente cada 30 segundos
+    setInterval(fetchData, POLLING_INTERVAL);
+  </script>
+</body>
+</html>
