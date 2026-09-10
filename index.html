@@ -44,6 +44,7 @@
       border-radius: 8px;
       padding: 3rem 2rem;
       box-shadow: 0 10px 30px rgba(74, 21, 33, 0.2);
+      overflow: hidden; /* Evita que cualquier elemento hijo sobresalga del marco */
     }
 
     .header {
@@ -119,7 +120,7 @@
       font-size: 1.5rem;
     }
 
-    /* Pestañas Principales (General / Categoría) */
+    /* Pestañas Principales */
     .tabs-container {
       display: flex;
       justify-content: center;
@@ -149,7 +150,7 @@
       color: var(--blanco);
     }
 
-    /* Pestañas Secundarias (Los Desafíos) */
+    /* Pestañas Secundarias (Desafíos) */
     .tabs-desafios {
       display: flex;
       flex-wrap: wrap;
@@ -196,6 +197,14 @@
       display: block;
     }
 
+    /* ENVOLTORIO RESPONSIVO PARA LA TABLA */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+      border-radius: 8px;
+    }
+
     .tabla-posiciones {
       width: 100%;
       border-collapse: separate;
@@ -203,7 +212,7 @@
       background: var(--blanco);
       border: 1px solid var(--granate);
       border-radius: 8px;
-      overflow: hidden;
+      min-width: 450px; /* Asegura que la tabla no se aplaste demasiado antes de hacer scroll */
     }
 
     th, td {
@@ -262,6 +271,41 @@
       border: 1px solid var(--dorado);
       border-radius: 8px;
     }
+
+    /* MEDIA QUERIES PARA CELULARES (Móviles) */
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem 0.5rem; /* Menos espacio inútil a los costados */
+      }
+      .afiche-container {
+        padding: 2rem 1rem; /* Marco interior más ajustado */
+        outline: 4px solid var(--granate);
+        outline-offset: 2px;
+      }
+      .titulo-35 {
+        font-size: 4.5rem; /* Ajuste del 35 */
+      }
+      .creciendo-juntos {
+        font-size: 2rem;
+      }
+      .separador::before, .separador::after {
+        width: 80px; /* Separador más corto */
+      }
+      .tab-btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+      }
+      th, td {
+        padding: 0.6rem 0.4rem; /* Celdas más compactas */
+      }
+      .col-curso { font-size: 0.9rem; }
+      .col-carrera { font-size: 0.7rem; }
+      .col-puntos { font-size: 1.2rem; }
+      .posicion { font-size: 1.2rem; }
+      .tabla-general tr:nth-child(1) .posicion { font-size: 1.5rem; }
+      .tabla-general tr:nth-child(2) .posicion { font-size: 1.4rem; }
+      .tabla-general tr:nth-child(3) .posicion { font-size: 1.4rem; }
+    }
   </style>
 </head>
 <body>
@@ -286,26 +330,28 @@
 
     <!-- VISTA GENERAL -->
     <div id="vista-general" class="vista-seccion active">
-      <table class="tabla-posiciones tabla-general">
-        <thead>
-          <tr>
-            <th>Pos</th>
-            <th style="text-align: left;">Curso</th>
-            <th style="text-align: left;">Equipo</th>
-            <th>Puntos</th>
-          </tr>
-        </thead>
-        <tbody id="leaderboard-general"></tbody>
-      </table>
+      <!-- DIV WRAPPER PARA RESPONSIVE -->
+      <div class="table-responsive">
+        <table class="tabla-posiciones tabla-general">
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th style="text-align: left;">Curso</th>
+              <th style="text-align: left;">Equipo</th>
+              <th>Puntos</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-general"></tbody>
+        </table>
+      </div>
     </div>
 
     <!-- VISTA POR DESAFÍO -->
     <div id="vista-categoria" class="vista-seccion">
-      
-      <!-- Contenedor de las pestañas de desafíos (reemplaza al select) -->
       <div class="tabs-desafios" id="tabs-desafios"></div>
 
-      <div id="contenedor-tabla-categoria">
+      <!-- DIV WRAPPER PARA RESPONSIVE -->
+      <div class="table-responsive" id="contenedor-tabla-categoria">
         <table class="tabla-posiciones">
           <thead>
             <tr>
@@ -329,9 +375,8 @@
     let baseDatos = [];
     let nombresDesafios = [];
     let pestañaActiva = 'general'; 
-    let desafioActivoIndex = null; // Guarda el índice de la pestaña de desafío actual
+    let desafioActivoIndex = null; 
 
-    // Parseo puro CSV
     function parseCSV(text) {
       let result = [];
       let row = [];
@@ -371,7 +416,6 @@
         const text = await response.text();
         const rows = parseCSV(text);
 
-        // REGLA: Extraer nombres de desafíos de la fila 2 SOLO HASTA LA COLUMNA J (índices 3 a 9)
         nombresDesafios = [];
         for (let col = 3; col <= 9; col++) {
           let nombre = (rows[1] && rows[1][col]) ? rows[1][col].trim() : `Desafío ${col - 2}`;
@@ -382,7 +426,6 @@
         baseDatos = [];
         let carreraActual = '-';
 
-        // Procesar desde la fila 3 a la 57 (índices 2 a 56 del array)
         for (let i = 2; i <= 56; i++) {
           if (!rows[i]) continue;
           
@@ -391,12 +434,12 @@
           const colC = (rows[i][2] || '').trim();
 
           if (colA !== '') carreraActual = colA;
+          
           if (colB === '' || colB.toLowerCase().includes('curso')) continue;
 
           let puntajes = [];
           let total = 0;
 
-          // REGLA: Puntajes totales suman D a K (índices 3 a 10)
           for (let col = 3; col <= 10; col++) {
             let pts = 0; 
             let val = (rows[i][col] || '').trim();
@@ -434,7 +477,6 @@
       }
     }
 
-    // Genera las pestañas para los desafíos (solo si tienen > 0 puntos)
     function renderizarTabsDesafios() {
       const contenedor = document.getElementById('tabs-desafios');
       contenedor.innerHTML = '';
@@ -443,7 +485,6 @@
       let elActualSigueActivo = false;
 
       nombresDesafios.forEach((nombre, index) => {
-        // Verifica si algún curso tiene más de 0 puntos en este desafío
         const tienePuntos = baseDatos.some(item => item.puntajesDesafios[index] > 0);
         
         const btn = document.createElement('button');
@@ -454,7 +495,6 @@
           btn.classList.add('disabled');
           btn.title = "Aún no hay puntos asignados en este desafío";
         } else {
-          // Si tiene puntos, la pestaña es cliqueable
           if (primerActivo === null) primerActivo = index;
           if (desafioActivoIndex === index) elActualSigueActivo = true;
 
@@ -468,11 +508,10 @@
         contenedor.appendChild(btn);
       });
 
-      // Si el desafío que estábamos viendo se vació, o es la primera carga, seleccionamos el primero disponible
       if (!elActualSigueActivo && primerActivo !== null) {
         desafioActivoIndex = primerActivo;
       } else if (!elActualSigueActivo && primerActivo === null) {
-        desafioActivoIndex = null; // Nada tiene puntos
+        desafioActivoIndex = null;
       }
 
       actualizarEstadoVisualTabsDesafios();
@@ -512,7 +551,6 @@
     function renderCategoria() {
       const contenedor = document.getElementById('contenedor-tabla-categoria');
       
-      // Si no hay ningún desafío activo (todos en 0)
       if (desafioActivoIndex === null) {
         contenedor.innerHTML = `<div class="mensaje-vacio">Aún no hay puntos registrados en ningún desafío.</div>`;
         return;
@@ -574,9 +612,7 @@
       }
     }
 
-    // Inicializar
     fetchData();
-    // Refrescar automáticamente cada 30 segundos
     setInterval(fetchData, POLLING_INTERVAL);
   </script>
 </body>
